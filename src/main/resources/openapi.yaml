@@ -1,0 +1,216 @@
+openapi: 3.0.3
+info:
+  title: Customer Rewards API
+  description: API for calculating and retrieving customer reward points based on purchase transactions
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+
+tags:
+  - name: Rewards
+    description: Customer rewards endpoints
+  - name: Transactions
+    description: Transaction management endpoints
+
+paths:
+  /rewards:
+    get:
+      tags: [Rewards]
+      summary: Get all customer rewards
+      description: Returns reward summaries with monthly and total points for every customer
+      responses:
+        '200':
+          description: Rewards retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RewardSummary'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /rewards/{customerId}:
+    get:
+      tags: [Rewards]
+      summary: Get rewards by customer ID
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Unique customer identifier
+          schema:
+            type: string
+            example: C001
+      responses:
+        '200':
+          description: Reward summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions:
+    get:
+      tags: [Transactions]
+      summary: Get all transactions
+      description: Returns the full list of transactions across all customers
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Transactions]
+      summary: Create a new transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /transactions/{transactionId}:
+    delete:
+      tags: [Transactions]
+      summary: Delete a transaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: TXN001
+      responses:
+        '204':
+          description: Transaction deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Transaction:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: TXN001
+        customerId:
+          type: string
+          example: C001
+        customerName:
+          type: string
+          example: Alice Johnson
+        amount:
+          type: number
+          example: 120.00
+        transactionDate:
+          type: string
+          format: date
+          example: 2026-01-05
+
+    TransactionRequest:
+      type: object
+      required: [transactionId, customerId, customerName, amount, transactionDate]
+      properties:
+        transactionId:
+          type: string
+          example: TXN011
+        customerId:
+          type: string
+          example: C001
+        customerName:
+          type: string
+          example: Alice Johnson
+        amount:
+          type: number
+          minimum: 0.01
+          example: 85.00
+        transactionDate:
+          type: string
+          format: date
+          example: 2026-04-01
+
+    RewardSummary:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: C001
+        customerName:
+          type: string
+          example: Alice Johnson
+        monthlyPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyPoints'
+        totalPoints:
+          type: integer
+          example: 250
+
+    MonthlyPoints:
+      type: object
+      properties:
+        month:
+          type: string
+          example: JANUARY
+        points:
+          type: integer
+          example: 90
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Customer not found
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
