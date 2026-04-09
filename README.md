@@ -14,10 +14,19 @@ Spring Boot REST API that calculates reward points per customer based on purchas
 
 ## Getting Started
 
-```bash
+```
 git clone https://github.com/Gauri-2507/customer-rewards-api.git
 cd customer-rewards-api
-mvn spring-boot:run
+```
+
+**On Windows:**
+```
+mvnw spring-boot:run
+```
+
+**On Mac/Linux:**
+```
+./mvnw spring-boot:run
 ```
 
 Base URL: `http://localhost:8080`
@@ -52,6 +61,35 @@ H2 console: `http://localhost:8080/h2-console` — JDBC URL: `jdbc:h2:mem:reward
 ]
 ```
 
+### GET /api/rewards/{customerId}
+
+```json
+{
+  "customerId": "C001",
+  "customerName": "Alice Johnson",
+  "monthlyPoints": [
+    { "month": "JANUARY",  "points": 115 },
+    { "month": "FEBRUARY", "points": 250 },
+    { "month": "MARCH",    "points": 0   }
+  ],
+  "totalPoints": 365
+}
+```
+
+### GET /api/transactions
+
+```json
+[
+  {
+    "transactionId": "TXN001",
+    "customerId": "C001",
+    "customerName": "Alice Johnson",
+    "amount": 120,
+    "transactionDate": "2026-01-05"
+  }
+]
+```
+
 ### POST /api/transactions
 
 ```json
@@ -73,7 +111,7 @@ All errors follow this shape:
 ```json
 {
   "status": 404,
-  "error": "Customer Not Found",
+  "error": "Not Found",
   "message": "Customer not found with ID: C999",
   "timestamp": "2026-04-07T10:30:00"
 }
@@ -93,12 +131,18 @@ All errors follow this shape:
 | $50 – $100 | 1 pt per dollar over $50 |
 | > $100 | 50 pts + 2 pts per dollar over $100 |
 
-Examples: `$75` → 25 pts &nbsp;|&nbsp; `$120` → 90 pts &nbsp;|&nbsp; `$200` → 250 pts
+Examples: `$75` → 25 pts | `$120` → 90 pts | `$200` → 250 pts
 
 ## Running Tests
 
-```bash
-mvn test
+**On Windows:**
+```
+mvnw test
+```
+
+**On Mac/Linux:**
+```
+./mvnw test
 ```
 
 ## Project Structure
@@ -112,7 +156,8 @@ src/main/java/com/rewards/
 ├── dto/           RewardSummary, MonthlyPoints,
 │                  TransactionRequest,
 │                  ErrorResponse
-└── exception/     CustomerNotFoundException,
+└── exception/     RewardsException,
+                   CustomerNotFoundException,
                    TransactionNotFoundException,
                    GlobalExceptionHandler
 ```
